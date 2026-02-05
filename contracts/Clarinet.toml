@@ -1,7 +1,7 @@
 [project]
 name = "guardian-vault"
 description = "sBTC Guardian Vault: spending rules, social recovery, inheritance"
-authors = ["kamikaiten.base.eth"] 
+authors = ["solmidey"]
 telemetry = false
 
 [contracts.vault]
@@ -21,3 +21,6 @@ path = "contracts/errors.clar"
 
 [contracts.sip010-ft-trait]
 path = "contracts/traits/sip010-ft-trait.clar"
+
+[contracts.mock-sbtc]
+path = "contracts/mock-sbtc.clar"

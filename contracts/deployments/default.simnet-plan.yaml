@@ -84,11 +84,6 @@ plan:
             path: contracts/policy.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: recovery
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/recovery.clar
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: sip010-ft-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/traits/sip010-ft-trait.clar
@@ -97,5 +92,10 @@ plan:
             contract-name: vault
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/vault.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: recovery
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/recovery.clar
             clarity-version: 1
       epoch: "2.05"

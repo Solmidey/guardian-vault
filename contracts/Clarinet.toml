@@ -1,22 +1,23 @@
 [project]
-name = "contracts"
-description = ""
-authors = []
-telemetry = true
-cache_dir = "./.cache"
+name = "guardian-vault"
+description = "sBTC Guardian Vault: spending rules, social recovery, inheritance"
+authors = ["kamikaiten.base.eth"] 
+telemetry = false
 
-# [contracts.counter]
-# path = "contracts/counter.clar"
-# epoch = "latest"
+[contracts.vault]
+path = "contracts/vault.clar"
 
-[repl.analysis]
-passes = ["check_checker"]
-check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
+[contracts.guardians]
+path = "contracts/guardians.clar"
 
-# Check-checker settings:
-# trusted_sender: if true, inputs are trusted after tx_sender has been checked.
-# trusted_caller: if true, inputs are trusted after contract-caller has been checked.
-# callee_filter: if true, untrusted data may be passed into a private function without a
-# warning, if it gets checked inside. This check will also propagate up to the
-# caller.
-# More informations: https://www.hiro.so/blog/new-safety-checks-in-clarinet
+[contracts.recovery]
+path = "contracts/recovery.clar"
+
+[contracts.policy]
+path = "contracts/policy.clar"
+
+[contracts.errors]
+path = "contracts/errors.clar"
+
+[contracts.sip010-ft-trait]
+path = "contracts/traits/sip010-ft-trait.clar"

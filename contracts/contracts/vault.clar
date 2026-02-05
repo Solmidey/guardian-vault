@@ -191,3 +191,8 @@
     )
   )
 )
+
+;; Read-only helper for recovery authorization
+(define-read-only (get-owner)
+  (ok (var-get owner))
+)

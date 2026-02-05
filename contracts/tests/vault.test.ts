@@ -147,3 +147,41 @@ describe("guardian-vault", () => {
     expect(cfgStr).toContain("owner");
   });
 });
+
+  it("recovery cancel works and blocks execution", () => {
+    const token = Cl.contractPrincipal(simnet.deployer, "mock-sbtc");
+    const recoveryPrincipal = `${simnet.deployer}.recovery`;
+
+    // guardians threshold 1, one guardian wallet2
+    expect(simnet.callPublicFn("guardians", "init", [Cl.principal(wallet1), Cl.uint(1)], wallet1).result).toBeOk(Cl.bool(true));
+    expect(simnet.callPublicFn("guardians", "add-guardian", [Cl.principal(wallet2)], wallet1).result).toBeOk(Cl.bool(true));
+
+    // init vault
+    expect(
+      simnet.callPublicFn(
+        "vault",
+        "init",
+        [Cl.principal(wallet1), token, Cl.principal(recoveryPrincipal), Cl.uint(0), Cl.uint(0), Cl.uint(0)],
+        wallet1
+      ).result
+    ).toBeOk(Cl.bool(true));
+
+    const prop = simnet.callPublicFn("recovery", "propose-owner", [Cl.principal(wallet2), Cl.uint(5), Cl.uint(50)], wallet1);
+    expect(prop.result.type).toBe("ok");
+    const id = (prop.result as any).value.value;
+
+    // read-only get-proposal should return (some ...)
+    const gp = simnet.callReadOnlyFn("recovery", "get-proposal", [Cl.uint(id)], wallet1);
+    expect(cvToString(gp.result)).toContain("some");
+
+    // cancel by proposer
+    expect(simnet.callPublicFn("recovery", "cancel", [Cl.uint(id)], wallet1).result).toBeOk(Cl.bool(true));
+
+    // approve still fails (canceled)
+    const ap = simnet.callPublicFn("recovery", "approve", [Cl.uint(id)], wallet2);
+    expect(ap.result).toBeErr(Cl.uint(146)); // ERR-RECOVERY-CANCELED
+
+    // execute fails (canceled)
+    const ex = simnet.callPublicFn("recovery", "execute", [Cl.uint(id)], wallet1);
+    expect(ex.result).toBeErr(Cl.uint(146)); // ERR-RECOVERY-CANCELED
+  });

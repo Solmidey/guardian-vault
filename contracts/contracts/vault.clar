@@ -23,6 +23,19 @@
   )
 )
 
+;; Owner rotation (v0) - later this will be gated by guardian recovery rules.
+(define-public (set-owner (new-owner principal))
+  (begin
+    (if (not (is-owner tx-sender))
+        (err ERR-NOT-AUTHORIZED)
+        (begin
+          (var-set owner (some new-owner))
+          (ok true)
+        )
+    )
+  )
+)
+
 (define-read-only (get-status)
   (ok {
     initialized: (var-get initialized),

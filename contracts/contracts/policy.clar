@@ -4,6 +4,9 @@
 (define-constant ERR-INVALID-ARG    u110)
 (define-constant ERR-INVALID-STATE  u111)
 
+;; Safety cap: prevent absurd cooldowns (approx <= 1 year of blocks)
+(define-constant MAX-COOLDOWN-BLOCKS u52560)
+
 (define-data-var initialized bool false)
 (define-data-var owner (optional principal) none)
 
@@ -15,6 +18,14 @@
   (is-eq (var-get owner) (some who))
 )
 
+(define-private (valid-policy (dl uint) (lwt uint) (cb uint))
+  (and
+    (<= cb MAX-COOLDOWN-BLOCKS)
+    ;; If daily-limit is enabled (>0), the large-withdraw threshold must not exceed it.
+    (or (is-eq dl u0) (<= lwt dl))
+  )
+)
+
 (define-public (init
     (new-owner principal)
     (initial-daily-limit uint)
@@ -24,13 +35,16 @@
   (begin
     (if (var-get initialized)
         (err ERR-INVALID-STATE)
-        (begin
-          (var-set owner (some new-owner))
-          (var-set daily-limit initial-daily-limit)
-          (var-set large-withdraw-threshold initial-large-withdraw-threshold)
-          (var-set cooldown-blocks initial-cooldown-blocks)
-          (var-set initialized true)
-          (ok true)
+        (if (not (valid-policy initial-daily-limit initial-large-withdraw-threshold initial-cooldown-blocks))
+            (err ERR-INVALID-ARG)
+            (begin
+              (var-set owner (some new-owner))
+              (var-set daily-limit initial-daily-limit)
+              (var-set large-withdraw-threshold initial-large-withdraw-threshold)
+              (var-set cooldown-blocks initial-cooldown-blocks)
+              (var-set initialized true)
+              (ok true)
+            )
         )
     )
   )
@@ -44,13 +58,14 @@
   (begin
     (if (not (is-owner tx-sender))
         (err ERR-NOT-AUTHORIZED)
-        (begin
-          ;; Basic sanity: cooldown can be 0, limits can be 0 (disables feature).
-          ;; If you want stronger rules, we'll add them later.
-          (var-set daily-limit new-daily-limit)
-          (var-set large-withdraw-threshold new-large-withdraw-threshold)
-          (var-set cooldown-blocks new-cooldown-blocks)
-          (ok true)
+        (if (not (valid-policy new-daily-limit new-large-withdraw-threshold new-cooldown-blocks))
+            (err ERR-INVALID-ARG)
+            (begin
+              (var-set daily-limit new-daily-limit)
+              (var-set large-withdraw-threshold new-large-withdraw-threshold)
+              (var-set cooldown-blocks new-cooldown-blocks)
+              (ok true)
+            )
         )
     )
   )
